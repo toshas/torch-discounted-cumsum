@@ -38,7 +38,7 @@ Features of the package:
 pip install torch-discounted-cumsum
 ```
 
-The package compiles native code during installation and thus may fail on some systems. In this case, scroll down to the "Known issues" section.
+See Troubleshooting in case of errors.
 
 #### API
 
@@ -175,9 +175,16 @@ SciPy provides a `scipy.signal.lfilter` function for computing IIR filter respon
 can be used for the task at hand, as suggested in this [StackOverflow](https://stackoverflow.com/a/47971187/411907) 
 response.
 
-## Known issues
+## Troubleshooting
 
-- Old `pip` ignores the custom installation pipeline defined in `pyproject.toml`. Try updating pip with `pip install --upgrade pip` and rerun installation.
+The package relies on custom CUDA code, which is compiled upon installation. The most common source of problems is failure to compile the code, which results in package installation failure. Check the following aspects of your environment:
+
+- **pip version** needs to be the latest to support the custom installation pipeline defined by `pyproject.toml`. Update with `pip3 install --upgrade pip`
+- **Python version** 3.6 is the minimum; however, too new releases may have compatibility issues with PyTorch packages
+- **PyTorch version** 1.5 is the minimum, the newer the better. Each version of PyTorch supports a range of CUDA driver/toolkit versions, which can be identified from [here](https://pytorch.org/get-started/previous-versions/)
+- **CUDA toolkit version** Run `nvcc --version` to find out what you have installed. CUDA toolkits are supported by a certain range of drivers, which can be checked [here](https://docs.nvidia.com/deploy/cuda-compatibility/index.html) (Table 1)
+- **CUDA driver** Run `nvidia-smi` - driver version will be shown in the table
+- **OS version** (Linux) All of the above may depend on the version of your OS. In case of Ubuntu, use `lsb_release -a` to find out the version. Other distributions have their [ways](https://unix.stackexchange.com/a/88647/309414).
 
 ## Citation
 
