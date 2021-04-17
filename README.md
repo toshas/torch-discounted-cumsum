@@ -38,6 +38,8 @@ Features of the package:
 pip install torch-discounted-cumsum
 ```
 
+The package compiles native code during installation and thus may fail on some systems. In this case, scroll down to the "Known issues" section.
+
 #### API
 
 - `discounted_cumsum_right`: Computes discounted cumulative sums to the right of each position (a standard setting in RL)
@@ -172,6 +174,10 @@ formula above. Under the hood, however, `tf.scan` implement the traditional sequ
 SciPy provides a `scipy.signal.lfilter` function for computing IIR filter response using the sequential algorithm, which 
 can be used for the task at hand, as suggested in this [StackOverflow](https://stackoverflow.com/a/47971187/411907) 
 response.
+
+## Known issues
+
+- Old `pip` ignores the custom installation pipeline defined in `pyproject.toml`. Try updating pip with `pip install --upgrade pip` and rerun installation.
 
 ## Citation
 
