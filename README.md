@@ -193,6 +193,10 @@ To cite this repository, use the following BibTeX:
   author={Anton Obukhov},
   year=2021,
   title={Fast discounted cumulative sums in PyTorch},
-  url={https://github.com/toshas/torch-discounted-cumsum}
+  url={https://github.com/toshas/torch-discounted-cumsum},
+  publisher={Zenodo},
+  version={v1.1.0},
+  doi={10.5281/zenodo.5302420},
+  note={Version: 1.1.0, DOI: 10.5281/zenodo.5302420}
 }
 ```
