@@ -50,8 +50,9 @@ template <typename scalar_t, SumDirection sum_direction>
 __global__
 void discounted_cumsum_kernel_stage(
     torch::PackedTensorAccessor32<scalar_t, 2> x,
-    const scalar_t gamma,
-    int stage
+    torch::PackedTensorAccessor32<scalar_t, 1> gamma,
+    int stage,
+    bool gamma_scalar
 ) {
     const int len = x.size(1);
     const int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -77,10 +78,12 @@ void discounted_cumsum_kernel_stage(
         return;
     }
 
+    scalar_t gamma_item = gamma_scalar ? gamma[0] : gamma[thread_idy];
+
     x[thread_idy][change_pos] = discounted_sum_power(
         x[thread_idy][change_pos],
         x[thread_idy][discounted_pos],
-        gamma,
+        gamma_item,
         discount_power
     );
 }
@@ -93,14 +96,19 @@ int log2ceil(int x) {
 
 
 template <SumDirection sum_direction>
-torch::Tensor discounted_cumsum(torch::Tensor x, double gamma) {
+torch::Tensor discounted_cumsum(torch::Tensor x, torch::Tensor gamma) {
     // Minimum required number of threads, assigns them dynamically to respective positions upon each iteration.
     // Results in uncoalesced writes, which is still faster than coalesced writes with half threads idling.
 
     TORCH_CHECK(x.device().is_cuda(), "Input must be a CUDA tensor");
     TORCH_CHECK(x.is_contiguous(), "Input must be contiguous");
     TORCH_CHECK(x.dim() == 2, "Input must be 2-dimensional");
-    TORCH_CHECK(0.0 <= gamma && gamma <= 1.0, "Gamma must be in the range [0,1]");
+    TORCH_CHECK(gamma.device().is_cuda(), "Gamma must be a CUDA tensor");
+    TORCH_CHECK(gamma.dim() == 1, "Gamma must be 1-dimensional");
+    TORCH_CHECK(gamma.size(0) == 1 || gamma.size(0) == x.size(0), "Gamma dimensions must be compatible with the input");
+    TORCH_CHECK(x.dtype() == gamma.dtype(), "Argument data types must match");
+
+    bool gamma_scalar = gamma.size(0) != x.size(0);
 
     if (x.size(1) == 0) {
         return x;
@@ -117,8 +125,9 @@ torch::Tensor discounted_cumsum(torch::Tensor x, double gamma) {
         AT_DISPATCH_FLOATING_TYPES(x.scalar_type(), "discounted_cumsum_kernel_stage", ([&] {
             discounted_cumsum_kernel_stage<scalar_t, sum_direction><<<blocks, threads>>>(
                 y.packed_accessor32<scalar_t, 2>(),
-                scalar_t(gamma),
-                stage
+                gamma.packed_accessor32<scalar_t, 1>(),
+                stage,
+                gamma_scalar
             );
         }));
     }
@@ -127,11 +136,11 @@ torch::Tensor discounted_cumsum(torch::Tensor x, double gamma) {
 }
 
 
-torch::Tensor discounted_cumsum_left_cuda(torch::Tensor x, double gamma) {
+torch::Tensor discounted_cumsum_left_cuda(torch::Tensor x, torch::Tensor gamma) {
     return discounted_cumsum<SUM_DIRECTION_LEFT>(x, gamma);
 }
 
 
-torch::Tensor discounted_cumsum_right_cuda(torch::Tensor x, double gamma) {
+torch::Tensor discounted_cumsum_right_cuda(torch::Tensor x, torch::Tensor gamma) {
     return discounted_cumsum<SUM_DIRECTION_RIGHT>(x, gamma);
 }

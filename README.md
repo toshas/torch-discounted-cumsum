@@ -23,7 +23,8 @@ Features of the parallel algorithm:
 Features of the package:
 - CPU: sequential algorithm in C++
 - GPU: parallel algorithm in CUDA
-- Gradients computation wrt input
+- Gradients computation for input and gamma
+- Batch support for input and gamma
 - Both left and right directions of summation supported
 - PyTorch bindings
 
@@ -108,7 +109,7 @@ In the CUDA implementation, `N / 2` CUDA threads are allocated during each stage
 strict separation of updates into stages via separate kernel invocations guarantees stage-level synchronization and 
 global consistency of updates.
 
-The gradients wrt input can be obtained from the gradients wrt output by simply taking `cumsum` operation with the 
+The gradients for input can be obtained from the gradients for output by simply taking `cumsum` operation with the 
 reversed direction of summation.
 
 ## Numerical Precision

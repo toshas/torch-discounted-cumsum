@@ -3,6 +3,9 @@ import os
 from setuptools import setup, find_packages
 from torch.utils.cpp_extension import BuildExtension, CppExtension, CUDAExtension
 
+with open(os.path.join('torch_discounted_cumsum', 'version.py')) as f:
+    version_pycode = f.read()
+exec(version_pycode)
 
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
@@ -26,7 +29,8 @@ Features of the parallel algorithm:
 Features of the package:
 - CPU: sequential algorithm in C++
 - GPU: parallel algorithm in CUDA
-- Gradients computation wrt input
+- Gradients computation for input and gamma
+- Batch support for input and gamma
 - Both left and right directions of summation supported
 - PyTorch bindings
 
@@ -61,7 +65,7 @@ def configure_extensions():
 
 setup(
     name='torch_discounted_cumsum',
-    version='1.0.2',
+    version=__version__,
     description='Fast discounted cumulative sums in PyTorch',
     long_description=long_description,
     long_description_content_type='text/markdown',
