@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Obukhov
+    given-names: Anton
+type: software
+title: "Fast discounted cumulative sums in PyTorch"
+version: "v1.1.0"
+doi: 10.5281/zenodo.5302420
+date-released: 2021-08-28
+repository-code: https://github.com/toshas/torch-discounted-cumsum
